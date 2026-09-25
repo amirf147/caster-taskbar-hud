@@ -1,0 +1,30 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Build and C++ artifacts
+build/
+bin/
+obj/
+*.obj
+*.o
+*.dll
+*.exe
+*.pdb
+
+# Environment and IDEs
+.vs/
+.vscode/
+.idea/
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+
+# OS artifacts
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
