@@ -8,7 +8,7 @@ on:
 
 jobs:
   safety-and-hygiene:
-    name: Security, Path Hygiene & Mod Metadata
+    name: Security, Path Hygiene & Pre-Commit Gates
     runs-on: windows-latest
 
     steps:
@@ -19,6 +19,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+
+      - name: Install Pre-Commit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pre-commit
+
+      - name: Run Pre-Commit Hooks
+        run: pre-commit run --all-files
 
       - name: Run Repository Safety & Mod Metadata Checker
         run: python scripts/check_repo_safety.py

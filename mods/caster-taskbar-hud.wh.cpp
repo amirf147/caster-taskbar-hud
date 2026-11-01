@@ -1560,6 +1560,30 @@ static bool HookTaskbarDllSymbols() {
     return WindhawkUtils::HookSymbols(h, taskbarDllHooks, ARRAYSIZE(taskbarDllHooks));
 }
 
+static bool IsShellProcess() {
+    PCWSTR cmd = GetCommandLineW();
+    if (cmd && (wcsstr(cmd, L"-Embedding") != nullptr ||
+                wcsstr(cmd, L"/factory") != nullptr)) {
+        return false;
+    }
+
+    HWND hPrimary = FindWindowW(L"Shell_TrayWnd", nullptr);
+    if (hPrimary) {
+        DWORD pid = 0;
+        GetWindowThreadProcessId(hPrimary, &pid);
+        return pid == GetCurrentProcessId();
+    }
+
+    HWND hProgman = FindWindowW(L"Progman", nullptr);
+    if (hProgman) {
+        DWORD pid = 0;
+        GetWindowThreadProcessId(hProgman, &pid);
+        return pid == GetCurrentProcessId();
+    }
+
+    return true;
+}
+
 } // namespace
 
 /**********************************************/
@@ -1568,6 +1592,12 @@ static bool HookTaskbarDllSymbols() {
 
 BOOL Wh_ModInit() {
     Wh_Log(L"Initializing Caster & ADCE Taskbar HUD Mod v1.1.2");
+
+    if (!IsShellProcess()) {
+        Wh_Log(L"Current process is not the shell host; skipping initialization");
+        return FALSE;
+    }
+
     g_unloading.store(false, std::memory_order_release);
     g_stopEvent = CreateEventW(nullptr, TRUE, FALSE, nullptr);
 
@@ -1585,7 +1615,12 @@ BOOL Wh_ModInit() {
 }
 
 void Wh_ModAfterInit() {
-    g_pipeThread = CreateThread(nullptr, 0, PipeServerThreadProc, nullptr, 0, nullptr);
+    if (!IsShellProcess()) {
+        return;
+    }
+    if (!g_pipeThread) {
+        g_pipeThread = CreateThread(nullptr, 0, PipeServerThreadProc, nullptr, 0, nullptr);
+    }
     TriggerInjectAll();
 }
 

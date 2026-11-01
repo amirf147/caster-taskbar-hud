@@ -180,6 +180,17 @@ def check_windhawk_mod_metadata() -> list[str]:
     if not verified_any:
         violations.append("No caster-taskbar-hud.wh.cpp file found in repository root or mods/ directory.")
 
+    # Validate that root and mods/ distribution copies remain byte-identical
+    root_mod = os.path.join(REPO_ROOT, "caster-taskbar-hud.wh.cpp")
+    mods_mod = os.path.join(REPO_ROOT, "mods", "caster-taskbar-hud.wh.cpp")
+    if os.path.exists(root_mod) and os.path.exists(mods_mod):
+        try:
+            with open(root_mod, "rb") as f1, open(mods_mod, "rb") as f2:
+                if f1.read() != f2.read():
+                    violations.append("caster-taskbar-hud.wh.cpp and mods/caster-taskbar-hud.wh.cpp are out of sync (not byte-identical).")
+        except Exception as e:
+            violations.append(f"Failed to compare mod file parity: {e}")
+
     return violations
 
 
