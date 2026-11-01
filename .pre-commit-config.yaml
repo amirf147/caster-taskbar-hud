@@ -21,4 +21,3 @@ repos:
         entry: python scripts/check_repo_safety.py
         language: system
         pass_filenames: false
-
